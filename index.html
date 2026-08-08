@@ -14,11 +14,11 @@
 {
   "versao": 2,
   "marca": {
-    "titulo": "Portal de Chamados",
+    "titulo": "Portal de Chamados - Lojas Presidente",
     "subtitulo": "Abra sua solicitacao para a equipe de TI",
     "rodape": "Equipe de TI",
-    "cor": "#075e54",
-    "corBotao": "#25d366"
+    "cor": "#ffed00",
+    "corBotao": "#004f9f"
   },
   "envio": {
     "metodo": "emailjs",
@@ -43,25 +43,25 @@
       "id": "email_solicitante",
       "label": "Seu e-mail",
       "tipo": "email",
-      "obrigatorio": true
+      "obrigatorio": false
     },
     {
-      "id": "setor",
-      "label": "Loja / Setor",
+      "id": "filial",
+      "label": "Filial",
       "tipo": "text",
-      "obrigatorio": false
+      "obrigatorio": true
     }
   ],
   "tipos": [
     {
       "id": "mudanca_de_funcao",
       "nome": "Mudança de Função",
-      "descricao": "Alteracao da funcao de um colaborador no sistema.",
+      "descricao": "Alteração da função de um colaborador no sistema.",
       "ativo": true,
       "campos": [
         {
-          "id": "cod_usuario",
-          "label": "Codigo do usuario no sistema",
+          "id": "codigo_do_usuario_no_sistema",
+          "label": "Código do usuário no sistema",
           "tipo": "text",
           "obrigatorio": true,
           "opcoes": []
@@ -74,23 +74,30 @@
           "opcoes": []
         },
         {
-          "id": "funcao_atual",
-          "label": "Funcao atual do colaborador",
+          "id": "funcao_atual_do_colaborador",
+          "label": "Função atual do colaborador",
           "tipo": "text",
           "obrigatorio": true,
           "opcoes": []
         },
         {
-          "id": "funcao_nova",
-          "label": "Nova funcao do colaborador",
+          "id": "nova_funcao_do_colaborador",
+          "label": "Nova função do colaborador",
           "tipo": "text",
           "obrigatorio": true,
           "opcoes": []
         },
         {
-          "id": "obs",
-          "label": "Observacoes",
+          "id": "data_de_inicio_e_fim_da_alteracao_de_fun",
+          "label": "Data de início e fim da alteração de função",
           "tipo": "textarea",
+          "obrigatorio": true,
+          "opcoes": []
+        },
+        {
+          "id": "observacao",
+          "label": "Observação",
+          "tipo": "text",
           "obrigatorio": false,
           "opcoes": []
         }
