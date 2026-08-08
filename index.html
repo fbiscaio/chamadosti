@@ -17,34 +17,83 @@
     "titulo": "Portal de Chamados",
     "subtitulo": "Abra sua solicitacao para a equipe de TI",
     "rodape": "Equipe de TI",
-    "cor": "#075E54",
-    "corBotao": "#25D366"
+    "cor": "#075e54",
+    "corBotao": "#25d366"
   },
   "envio": {
-    "metodo": "formsubmit",
-    "destino": "",
+    "metodo": "emailjs",
+    "destino": "fabricio@lojaspresidente.com.br,ti2@lojaspresidente.com.br",
     "copiaSolicitante": false,
     "assunto": "Novo Chamado - {tipo}",
     "endpoint": "",
-    "emailjs": { "publicKey": "", "serviceId": "", "templateId": "" }
+    "emailjs": {
+      "publicKey": "exbXoMcoAab_aqf_x",
+      "serviceId": "service_7y5us49",
+      "templateId": "template_baqdgph"
+    }
   },
   "campos_fixos": [
-    { "id": "solicitante", "label": "Seu nome", "tipo": "text", "obrigatorio": true },
-    { "id": "email_solicitante", "label": "Seu e-mail", "tipo": "email", "obrigatorio": true },
-    { "id": "setor", "label": "Loja / Setor", "tipo": "text", "obrigatorio": false }
+    {
+      "id": "solicitante",
+      "label": "Seu nome",
+      "tipo": "text",
+      "obrigatorio": true
+    },
+    {
+      "id": "email_solicitante",
+      "label": "Seu e-mail",
+      "tipo": "email",
+      "obrigatorio": true
+    },
+    {
+      "id": "setor",
+      "label": "Loja / Setor",
+      "tipo": "text",
+      "obrigatorio": false
+    }
   ],
   "tipos": [
     {
-      "id": "mudanca_funcao",
-      "nome": "Mudanca de Funcao",
+      "id": "mudanca_de_funcao",
+      "nome": "Mudança de Função",
       "descricao": "Alteracao da funcao de um colaborador no sistema.",
       "ativo": true,
       "campos": [
-        { "id": "cod_usuario",  "label": "Codigo do usuario no sistema", "tipo": "text",     "obrigatorio": true,  "opcoes": [] },
-        { "id": "nome_colab",   "label": "Nome completo do colaborador", "tipo": "text",     "obrigatorio": true,  "opcoes": [] },
-        { "id": "funcao_atual", "label": "Funcao atual do colaborador",  "tipo": "text",     "obrigatorio": true,  "opcoes": [] },
-        { "id": "funcao_nova",  "label": "Nova funcao do colaborador",   "tipo": "text",     "obrigatorio": true,  "opcoes": [] },
-        { "id": "obs",          "label": "Observacoes",                  "tipo": "textarea", "obrigatorio": false, "opcoes": [] }
+        {
+          "id": "cod_usuario",
+          "label": "Codigo do usuario no sistema",
+          "tipo": "text",
+          "obrigatorio": true,
+          "opcoes": []
+        },
+        {
+          "id": "nome_colab",
+          "label": "Nome completo do colaborador",
+          "tipo": "text",
+          "obrigatorio": true,
+          "opcoes": []
+        },
+        {
+          "id": "funcao_atual",
+          "label": "Funcao atual do colaborador",
+          "tipo": "text",
+          "obrigatorio": true,
+          "opcoes": []
+        },
+        {
+          "id": "funcao_nova",
+          "label": "Nova funcao do colaborador",
+          "tipo": "text",
+          "obrigatorio": true,
+          "opcoes": []
+        },
+        {
+          "id": "obs",
+          "label": "Observacoes",
+          "tipo": "textarea",
+          "obrigatorio": false,
+          "opcoes": []
+        }
       ]
     }
   ]
