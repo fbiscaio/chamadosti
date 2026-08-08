@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Portal de Chamados</title>
+
+<!-- ============================================================
+     CONFIGURACAO DO PORTAL
+     Arquivo gerado automaticamente. Nao edite este bloco na mao.
+     ============================================================ -->
+<script id="cfg" type="application/json">
+{
+  "versao": 2,
+  "marca": {
+    "titulo": "Portal de Chamados",
+    "subtitulo": "Abra sua solicitacao para a equipe de TI",
+    "rodape": "Equipe de TI",
+    "cor": "#075E54",
+    "corBotao": "#25D366"
+  },
+  "envio": {
+    "metodo": "formsubmit",
+    "destino": "",
+    "copiaSolicitante": false,
+    "assunto": "Novo Chamado - {tipo}",
+    "endpoint": "",
+    "emailjs": { "publicKey": "", "serviceId": "", "templateId": "" }
+  },
+  "campos_fixos": [
+    { "id": "solicitante", "label": "Seu nome", "tipo": "text", "obrigatorio": true },
+    { "id": "email_solicitante", "label": "Seu e-mail", "tipo": "email", "obrigatorio": true },
+    { "id": "setor", "label": "Loja / Setor", "tipo": "text", "obrigatorio": false }
+  ],
+  "tipos": [
+    {
+      "id": "mudanca_funcao",
+      "nome": "Mudanca de Funcao",
+      "descricao": "Alteracao da funcao de um colaborador no sistema.",
+      "ativo": true,
+      "campos": [
+        { "id": "cod_usuario",  "label": "Codigo do usuario no sistema", "tipo": "text",     "obrigatorio": true,  "opcoes": [] },
+        { "id": "nome_colab",   "label": "Nome completo do colaborador", "tipo": "text",     "obrigatorio": true,  "opcoes": [] },
+        { "id": "funcao_atual", "label": "Funcao atual do colaborador",  "tipo": "text",     "obrigatorio": true,  "opcoes": [] },
+        { "id": "funcao_nova",  "label": "Nova funcao do colaborador",   "tipo": "text",     "obrigatorio": true,  "opcoes": [] },
+        { "id": "obs",          "label": "Observacoes",                  "tipo": "textarea", "obrigatorio": false, "opcoes": [] }
+      ]
+    }
+  ]
+}
+</script>
+
+<style>
+  :root{
+    --cor:#075E54; --cor-btn:#25D366;
+    --bg:#eef1f4; --card:#fff; --texto:#1f2933; --suave:#667180;
+    --borda:#dde3e9; --erro:#d64545; --ok:#2f9e5f; --raio:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:var(--bg);color:var(--texto);line-height:1.5;
+    padding:20px 14px 50px;
+  }
+  .wrap{max-width:680px;margin:0 auto;}
+  .topo{background:var(--cor);color:#fff;border-radius:var(--raio) var(--raio) 0 0;padding:22px 24px;}
+  .topo h1{font-size:20px;font-weight:600;}
+  .topo p{font-size:14px;opacity:.85;margin-top:3px;}
+  .card{background:var(--card);border-radius:0 0 var(--raio) var(--raio);
+        padding:24px;box-shadow:0 2px 14px rgba(0,0,0,.07);}
+
+  .campo{margin-bottom:17px;}
+  label{display:block;font-size:14px;font-weight:600;margin-bottom:6px;}
+  input[type=text],input[type=email],input[type=tel],input[type=number],
+  input[type=date],select,textarea{
+    width:100%;padding:11px 13px;border:1px solid var(--borda);border-radius:8px;
+    font-size:15px;font-family:inherit;background:#fff;color:var(--texto);
+  }
+  input:focus,select:focus,textarea:focus{
+    outline:none;border-color:var(--cor);box-shadow:0 0 0 3px rgba(7,94,84,.13);
+  }
+  textarea{resize:vertical;min-height:88px;}
+  .check{display:flex;align-items:center;gap:9px;}
+  .check input{width:17px;height:17px;flex:none;}
+  .check label{margin:0;font-weight:400;}
+  .dica{font-size:12.5px;color:var(--suave);margin-top:5px;}
+  .req{color:var(--erro);}
+
+  .bloco{border:1px solid var(--borda);border-radius:var(--raio);
+         padding:18px;margin-bottom:18px;background:#fbfcfd;}
+  .bloco > h2{font-size:15px;color:var(--cor);margin-bottom:15px;
+              padding-bottom:9px;border-bottom:1px solid var(--borda);}
+  .bloco .desc{font-size:13px;color:var(--suave);margin:-9px 0 15px;}
+
+  button{font-family:inherit;font-size:16px;font-weight:600;border:none;border-radius:8px;
+         cursor:pointer;padding:14px;width:100%;background:var(--cor-btn);color:#fff;
+         transition:filter .15s;}
+  button:hover{filter:brightness(.92);}
+  button:disabled{opacity:.55;cursor:not-allowed;}
+  .btn-sec{background:#e6eaee;color:var(--texto);width:auto;padding:12px 20px;font-size:15px;}
+
+  .aviso{padding:13px 15px;border-radius:8px;font-size:14px;margin-bottom:16px;border-left:4px solid;}
+  .aviso.warn{background:#fdf5e3;border-color:#d9a520;}
+  .aviso.erro{background:#fbeaea;border-color:var(--erro);}
+
+  .sucesso{text-align:center;padding:22px 6px;}
+  .sucesso .icone{width:64px;height:64px;border-radius:50%;background:#eaf7ef;
+    display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
+    font-size:32px;color:var(--ok);}
+  .sucesso h2{font-size:19px;margin-bottom:8px;}
+  .sucesso p{color:var(--suave);font-size:14.5px;margin-bottom:8px;}
+  .protocolo{display:inline-block;margin:14px 0 20px;padding:9px 18px;background:#f2f5f8;
+    border-radius:8px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:17px;font-weight:600;letter-spacing:1px;}
+
+  .rodape{text-align:center;margin-top:18px;font-size:12.5px;color:var(--suave);}
+  .oculto{display:none !important;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="topo">
+    <h1 id="tituloTopo">Portal de Chamados</h1>
+    <p id="subtituloTopo">Abra sua solicitacao para a equipe de TI</p>
+  </div>
+  <div class="card">
+
+    <div id="areaForm">
+      <div id="avisoConfig"></div>
+      <form id="form" novalidate>
+        <div class="campo">
+          <label for="tipo">Tipo do chamado <span class="req">*</span></label>
+          <select id="tipo" required>
+            <option value="">Selecione uma opcao...</option>
+          </select>
+        </div>
+        <div id="blocoSolicitante" class="bloco">
+          <h2>Dados do solicitante</h2>
+          <div id="camposFixos"></div>
+        </div>
+        <div id="blocoTipo"></div>
+        <div id="erroEnvio"></div>
+        <button type="submit" id="btnEnviar">Enviar chamado</button>
+      </form>
+    </div>
+
+    <div id="areaSucesso" class="oculto">
+      <div class="sucesso">
+        <div class="icone">&#10003;</div>
+        <h2>Chamado enviado</h2>
+        <p>Sua solicitacao foi registrada e encaminhada para a equipe.</p>
+        <div class="protocolo" id="protocolo">-</div>
+        <p id="msgSucessoExtra"></p>
+        <div style="margin-top:20px">
+          <button class="btn-sec" onclick="novoChamado()">Abrir outro chamado</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="rodape"><span id="rodapeTexto">Equipe de TI</span></div>
+</div>
+
+<script>
+/* ==========================================================
+   PORTAL DE CHAMADOS - pagina publica
+   Le a configuracao do bloco #cfg acima. Nao guarda nada no
+   navegador e nao contem nenhuma funcao de administracao.
+   ========================================================== */
+
+var cfg = JSON.parse(document.getElementById('cfg').textContent);
+
+function $(id){ return document.getElementById(id); }
+function esc(s){
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function msg(alvo, texto, tipo){
+  $(alvo).innerHTML = texto ? '<div class="aviso ' + (tipo||'warn') + '">' + texto + '</div>' : '';
+}
+function descreverErro(e){
+  if (!e) return 'Erro desconhecido.';
+  if (typeof e === 'string') return e;
+  if (e.message) return e.message;
+  if (e.text) return e.text + (e.status ? ' (codigo ' + e.status + ')' : '');
+  if (e.status !== undefined) return 'Codigo ' + e.status + '.';
+  try { return JSON.stringify(e); } catch(x){ return String(e); }
+}
+
+/* ---------- tema ---------- */
+function aplicarTema(){
+  document.documentElement.style.setProperty('--cor', cfg.marca.cor);
+  document.documentElement.style.setProperty('--cor-btn', cfg.marca.corBotao);
+  document.title = cfg.marca.titulo;
+  $('tituloTopo').textContent    = cfg.marca.titulo;
+  $('subtituloTopo').textContent = cfg.marca.subtitulo;
+  $('rodapeTexto').textContent   = cfg.marca.rodape;
+}
+
+/* ---------- formulario ---------- */
+function htmlCampo(c, prefixo){
+  var id  = prefixo + '_' + c.id;
+  var obg = c.obrigatorio ? ' required' : '';
+  var ast = c.obrigatorio ? ' <span class="req">*</span>' : '';
+  var h   = '<div class="campo">';
+  if (c.tipo === 'checkbox') {
+    h += '<div class="check"><input type="checkbox" id="' + id + '"' + obg + '>' +
+         '<label for="' + id + '">' + esc(c.label) + ast + '</label></div>';
+  } else {
+    h += '<label for="' + id + '">' + esc(c.label) + ast + '</label>';
+    if (c.tipo === 'textarea') {
+      h += '<textarea id="' + id + '"' + obg + '></textarea>';
+    } else if (c.tipo === 'select') {
+      h += '<select id="' + id + '"' + obg + '><option value="">Selecione...</option>';
+      (c.opcoes || []).forEach(function(o){
+        h += '<option value="' + esc(o) + '">' + esc(o) + '</option>';
+      });
+      h += '</select>';
+    } else {
+      h += '<input type="' + c.tipo + '" id="' + id + '"' + obg + '>';
+    }
+  }
+  if (c.ajuda) h += '<p class="dica">' + esc(c.ajuda) + '</p>';
+  return h + '</div>';
+}
+
+function render(){
+  aplicarTema();
+
+  $('camposFixos').innerHTML = cfg.campos_fixos
+    .map(function(c){ return htmlCampo(c, 'fx'); }).join('');
+  $('blocoSolicitante').classList.toggle('oculto', cfg.campos_fixos.length === 0);
+
+  var ativos = cfg.tipos.filter(function(t){ return t.ativo !== false; });
+  var sel = $('tipo');
+  sel.innerHTML = '<option value="">Selecione uma opcao...</option>' +
+    ativos.map(function(t){
+      return '<option value="' + esc(t.id) + '">' + esc(t.nome) + '</option>';
+    }).join('');
+  if (ativos.length === 1) sel.value = ativos[0].id;
+  renderBlocoTipo();
+
+  var pend = [];
+  if (!ativos.length) pend.push('Nenhum tipo de chamado disponivel.');
+  if ((cfg.envio.metodo === 'mailto' || cfg.envio.metodo === 'formsubmit') && !cfg.envio.destino)
+    pend.push('E-mail de destino nao configurado.');
+  if (cfg.envio.metodo === 'endpoint' && !cfg.envio.endpoint)
+    pend.push('Endereco de envio nao configurado.');
+  if (cfg.envio.metodo === 'emailjs' && !cfg.envio.emailjs.serviceId)
+    pend.push('Servico de e-mail nao configurado.');
+
+  msg('avisoConfig', pend.length
+    ? '<strong>Este portal ainda nao esta pronto para receber chamados.</strong><br>' +
+      pend.join(' ') + ' Avise a equipe de TI.'
+    : '', 'warn');
+  $('btnEnviar').disabled = pend.length > 0;
+}
+
+function renderBlocoTipo(){
+  var t = cfg.tipos.filter(function(x){ return x.id === $('tipo').value; })[0];
+  if (!t) { $('blocoTipo').innerHTML = ''; return; }
+  $('blocoTipo').innerHTML =
+    '<div class="bloco"><h2>' + esc(t.nome) + '</h2>' +
+    (t.descricao ? '<p class="desc">' + esc(t.descricao) + '</p>' : '') +
+    t.campos.map(function(c){ return htmlCampo(c, 'tp'); }).join('') + '</div>';
+}
+
+/* ---------- coleta ---------- */
+function lerCampo(c, prefixo){
+  var el = $(prefixo + '_' + c.id);
+  if (!el) return '';
+  if (c.tipo === 'checkbox') return el.checked ? 'Sim' : 'Nao';
+  return el.value.trim();
+}
+function coletar(){
+  var t = cfg.tipos.filter(function(x){ return x.id === $('tipo').value; })[0];
+  if (!t) return { erro: 'Selecione o tipo do chamado.' };
+  var dados = [], faltando = [];
+  cfg.campos_fixos.forEach(function(c){
+    var v = lerCampo(c, 'fx');
+    if (c.obrigatorio && (v === '' || (c.tipo === 'checkbox' && v === 'Nao'))) faltando.push(c.label);
+    dados.push({ label: c.label, valor: v, id: c.id });
+  });
+  t.campos.forEach(function(c){
+    var v = lerCampo(c, 'tp');
+    if (c.obrigatorio && (v === '' || (c.tipo === 'checkbox' && v === 'Nao'))) faltando.push(c.label);
+    dados.push({ label: c.label, valor: v, id: c.id });
+  });
+  if (faltando.length) return { erro: 'Preencha os campos obrigatorios: ' + faltando.join(', ') + '.' };
+  return { tipo: t, dados: dados };
+}
+
+function protocoloNovo(){
+  var d = new Date(), p = function(n){ return String(n).padStart(2,'0'); };
+  return d.getFullYear() + p(d.getMonth()+1) + p(d.getDate()) + '-' +
+         p(d.getHours()) + p(d.getMinutes()) + '-' +
+         Math.random().toString(36).slice(2,5).toUpperCase();
+}
+function montarTexto(tipo, dados, protocolo){
+  var l = ['CHAMADO: ' + tipo.nome, 'PROTOCOLO: ' + protocolo,
+           'DATA: ' + new Date().toLocaleString('pt-BR'), '',
+           '--------------------------------------'];
+  dados.forEach(function(d){ l.push(d.label + ': ' + (d.valor || '-')); });
+  l.push('--------------------------------------');
+  l.push('Enviado pelo ' + cfg.marca.titulo + '.');
+  return l.join('\n');
+}
+function emailDoSolicitante(dados){
+  var achou = '';
+  dados.forEach(function(d){
+    if (!achou && /e-?mail/i.test(d.label) && /@/.test(d.valor)) achou = d.valor;
+  });
+  return achou;
+}
+function assuntoFinal(tipo, protocolo){
+  return (cfg.envio.assunto || 'Novo Chamado - {tipo}')
+    .replace(/\{tipo\}/g, tipo.nome).replace(/\{protocolo\}/g, protocolo);
+}
+
+/* ---------- envio ---------- */
+async function enviar(tipo, dados, protocolo){
+  var assunto = assuntoFinal(tipo, protocolo);
+  var texto   = montarTexto(tipo, dados, protocolo);
+  var copia   = cfg.envio.copiaSolicitante ? emailDoSolicitante(dados) : '';
+  var m       = cfg.envio.metodo;
+
+  if (m === 'mailto') {
+    window.location.href = 'mailto:' + encodeURIComponent(cfg.envio.destino) +
+      '?subject=' + encodeURIComponent(assunto) +
+      (copia ? '&cc=' + encodeURIComponent(copia) : '') +
+      '&body=' + encodeURIComponent(texto);
+    return { ok:true, aviso:'Seu programa de e-mail foi aberto com o chamado preenchido. ' +
+                            'Confira e clique em enviar para concluir.' };
+  }
+
+  if (m === 'formsubmit') {
+    var corpo = { _subject: assunto, Protocolo: protocolo, Tipo: tipo.nome,
+                  _template: 'table', _captcha: 'false' };
+    dados.forEach(function(d){ corpo[d.label] = d.valor || '-'; });
+    if (copia) corpo._cc = copia;
+    var r = await fetch('https://formsubmit.co/ajax/' + encodeURIComponent(cfg.envio.destino), {
+      method:'POST', headers:{ 'Content-Type':'application/json', 'Accept':'application/json' },
+      body: JSON.stringify(corpo)
+    });
+    var j = await r.json().catch(function(){ return {}; });
+    if (!r.ok || j.success === 'false' || j.success === false) {
+      throw new Error(j.message || 'O servico de e-mail recusou o envio.');
+    }
+    return { ok:true };
+  }
+
+  if (m === 'endpoint') {
+    var payload = { protocolo:protocolo, tipo:tipo.nome, tipoId:tipo.id, assunto:assunto,
+                    destino:cfg.envio.destino, data:new Date().toISOString(), campos:{}, texto:texto };
+    dados.forEach(function(d){ payload.campos[d.id] = { label:d.label, valor:d.valor }; });
+    var r2 = await fetch(cfg.envio.endpoint, {
+      method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload)
+    });
+    if (!r2.ok) throw new Error('O servidor respondeu com erro ' + r2.status + '.');
+    return { ok:true };
+  }
+
+  if (m === 'emailjs') {
+    var e = cfg.envio.emailjs;
+    if (!e.publicKey || !e.serviceId || !e.templateId) throw new Error('Servico de e-mail incompleto.');
+    if (!cfg.envio.destino) throw new Error('E-mail de destino nao configurado.');
+    await carregarEmailJs();
+    var params = {};
+    dados.forEach(function(d){ params[d.id] = d.valor; });
+    params.to_email  = cfg.envio.destino;
+    params.cc_email  = copia;
+    params.reply_to  = emailDoSolicitante(dados) || cfg.envio.destino;
+    params.from_name = (dados[0] && dados[0].valor) || 'Portal de Chamados';
+    params.subject   = assunto;
+    params.assunto   = assunto;
+    params.protocolo = protocolo;
+    params.tipo      = tipo.nome;
+    params.data      = new Date().toLocaleString('pt-BR');
+    params.message   = texto;
+    params.mensagem  = texto;
+    try{
+      await emailjs.send(e.serviceId, e.templateId, params, { publicKey: e.publicKey });
+    }catch(err){
+      throw new Error(explicarEmailJs(err));
+    }
+    return { ok:true };
+  }
+
+  throw new Error('Metodo de envio desconhecido.');
+}
+
+function explicarEmailJs(err){
+  var st = undefined;
+  if (err && err.status !== undefined && err.status !== null) st = err.status;
+  else if (err && err.code !== undefined && err.code !== null) st = err.code;
+  var txt = (err && (err.text || err.message)) || '';
+  var dicas = {
+    0:   'Nao foi possivel falar com o servico de e-mail. Verifique a conexao.',
+    400: 'O servico de e-mail recusou os dados enviados.',
+    401: 'Chave do servico de e-mail invalida.',
+    403: 'Acesso negado pelo servico de e-mail.',
+    404: 'Servico ou modelo de e-mail nao encontrado.',
+    422: 'O modelo de e-mail esta sem destinatario configurado.',
+    426: 'O servico de e-mail exige conexao segura (https).',
+    429: 'Limite de envios do servico de e-mail atingido.'
+  };
+  var p = [];
+  if (st !== undefined && dicas[st]) p.push(dicas[st]);
+  if (txt) p.push('Detalhe: "' + txt + '"');
+  if (!p.length) p.push('O servico de e-mail recusou o envio' +
+    (st !== undefined ? ' (codigo ' + st + ')' : '') + '.');
+  return p.join(' ');
+}
+
+function carregarEmailJs(){
+  return new Promise(function(res, rej){
+    if (window.emailjs) {
+      try{ emailjs.init({ publicKey: cfg.envio.emailjs.publicKey }); }catch(e){}
+      res(); return;
+    }
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+    var caiu = setTimeout(function(){
+      rej(new Error('O servico de e-mail demorou demais para responder.'));
+    }, 12000);
+    s.onload = function(){
+      clearTimeout(caiu);
+      if (!window.emailjs) { rej(new Error('Servico de e-mail carregou incompleto.')); return; }
+      try{ emailjs.init({ publicKey: cfg.envio.emailjs.publicKey }); res(); }
+      catch(e){ rej(new Error('Chave do servico de e-mail recusada.')); }
+    };
+    s.onerror = function(){
+      clearTimeout(caiu);
+      rej(new Error('Nao foi possivel carregar o servico de e-mail. Verifique a conexao.'));
+    };
+    document.head.appendChild(s);
+  });
+}
+
+/* ---------- submit ---------- */
+async function submeter(ev){
+  ev.preventDefault();
+  msg('erroEnvio','');
+  var r = coletar();
+  if (r.erro) { msg('erroEnvio', esc(r.erro), 'erro'); return; }
+
+  var btn = $('btnEnviar'), txt = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  var protocolo = protocoloNovo();
+  try{
+    var res = await enviar(r.tipo, r.dados, protocolo);
+    $('protocolo').textContent = protocolo;
+    $('msgSucessoExtra').textContent = res.aviso || '';
+    $('areaForm').classList.add('oculto');
+    $('areaSucesso').classList.remove('oculto');
+    window.scrollTo(0,0);
+  }catch(e){
+    msg('erroEnvio','<strong>Nao foi possivel enviar.</strong> ' + esc(descreverErro(e)) +
+        '<br>Tente novamente ou procure a equipe de TI.','erro');
+  }finally{
+    btn.disabled = false; btn.textContent = txt;
+  }
+}
+
+function novoChamado(){
+  $('areaSucesso').classList.add('oculto');
+  $('areaForm').classList.remove('oculto');
+  $('form').reset();
+  render();
+  window.scrollTo(0,0);
+}
+
+$('form').addEventListener('submit', submeter);
+$('tipo').addEventListener('change', renderBlocoTipo);
+render();
+</script>
+</body>
+</html>
